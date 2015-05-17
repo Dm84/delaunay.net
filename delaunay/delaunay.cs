@@ -32,48 +32,14 @@ namespace delaunay
 	/// </summary>
 	public class MainWnd : Form, IDrawable
 	{
-		private float			_width, _height;
-		private Triangulation	_triangulation = new Triangulation();
-		private Graphics		_graphics;
 
-		/// <summary>
-		/// Преобразует координаты из диапазона [-1.0, 1.0] в оконные 
-		/// </summary>
-		/// <returns>преобразованная точка</returns>
-		/// <param name="x">абсцисса</param>
-		/// <param name="y">ордината</param>
-		private Point ConvertToWindowed(float x, float y)
+		static int Main(string[] args)
 		{
-			float windowed_x = x * 0.5F + 0.5F, windowed_y = y * 0.5F + 0.5F;
-			return new Point((int)(windowed_x * (_width - 1.0F)), (int)(windowed_y * (_height - 1.0F)));
-		}
+			Trace.Listeners.Add(new ConsoleTraceListener());
+			Trace.AutoFlush = true;
 
-		/// <summary>
-		/// реализует метод интерфейса для выполнения прорисовки треугольника и описывающей его окружности
-		/// </summary>
-		/// <param name="vertices">вершины треугольника</param>
-		/// <param name="center">центр треугольника</param>
-		/// <param name="radius">массив вершин</param>
-		public void DrawTri(Vx [] vertices, Vx center, float radius)
-		{
-			Point[] points = new Point[3];
-			for (uint i = 0; i < 3; ++ i) {
-				points [i] = ConvertToWindowed (vertices [i].x, vertices [i].y);
-			}
-
-			try {
-				_graphics.DrawPolygon(new Pen(Color.Black), points);
-
-				Point leftUpper = ConvertToWindowed(center.x - radius, center.y - radius);
-				Point rightBottom = ConvertToWindowed(center.x + radius, center.y + radius);
-
-				_graphics.DrawEllipse(new Pen(Color.FromArgb(64, Color.Red)), 
-				                      new Rectangle(leftUpper.X, leftUpper.Y, rightBottom.X - leftUpper.X, rightBottom.Y - leftUpper.Y));
-
-			} catch (Exception e) 
-			{
-				Trace.WriteLine ("Ошибка при отрисовке: " + e.Message);
-			}
+			Application.Run(new MainWnd(600, 600));
+			return 0;
 		}
 
 		/// <summary>
@@ -107,6 +73,46 @@ namespace delaunay
 			base.OnPaint (e);
 		}
 
+		/// <summary>
+		/// Преобразует координаты из диапазона [-1.0, 1.0] в оконные 
+		/// </summary>
+		/// <returns>преобразованная точка</returns>
+		/// <param name="x">абсцисса</param>
+		/// <param name="y">ордината</param>
+		private Point ConvertToWindowed(float x, float y)
+		{
+			float windowed_x = x * 0.5F + 0.5F, windowed_y = y * 0.5F + 0.5F;
+			return new Point((int)(windowed_x * (_width - 1.0F)), (int)(windowed_y * (_height - 1.0F)));
+		}
+
+		/// <summary>
+		/// реализует метод интерфейса для выполнения прорисовки треугольника и описывающей его окружности
+		/// </summary>
+		/// <param name="vertices">вершины треугольника</param>
+		/// <param name="center">центр треугольника</param>
+		/// <param name="radius">массив вершин</param>
+		public void DrawTri(Vx [] vertices, Vx center, float radius)
+		{
+			var points = new Point[3];
+			for (uint i = 0; i < 3; ++ i) {
+				points [i] = ConvertToWindowed (vertices [i].x, vertices [i].y);
+			}
+
+			try {
+				_graphics.DrawPolygon(new Pen(Color.Black), points);
+
+				Point leftUpper = ConvertToWindowed(center.x - radius, center.y - radius);
+				Point rightBottom = ConvertToWindowed(center.x + radius, center.y + radius);
+
+				_graphics.DrawEllipse(new Pen(Color.FromArgb(64, Color.Red)), 
+				                      new Rectangle(leftUpper.X, leftUpper.Y, rightBottom.X - leftUpper.X, rightBottom.Y - leftUpper.Y));
+
+			} catch (Exception e) 
+			{
+				Trace.WriteLine ("Ошибка при отрисовке: " + e.Message);
+			}
+		}
+
 		protected override void OnResize(EventArgs e)
 		{
 			Invalidate ();
@@ -115,20 +121,21 @@ namespace delaunay
 
 		protected override void OnMouseClick (MouseEventArgs e)
 		{
-			Vx vx = new Vx { x = (float)e.X / _width * 2.0F - 1.0F, y = (float)e.Y / _height * 2.0F - 1.0F };
+			var vx = new Vx { 
+				x = (float)e.X / _width * 2.0F - 1.0F, 
+				y = (float)e.Y / _height * 2.0F - 1.0F 
+			};
+
 			_triangulation.AddVertex (vx);
+
 			Invalidate ();
 			base.OnClick (e);
 		}
 
-		static int Main(string[] args)
-		{
-			Trace.Listeners.Add(new ConsoleTraceListener());
-			Trace.AutoFlush = true;
+		private float			_width, _height;
+		private Triangulation	_triangulation = new Triangulation();
+		private Graphics		_graphics;
 
-			Application.Run(new MainWnd(600, 600));
-			return 0;
-		}
 	}
 
 	/// <summary>
@@ -139,7 +146,7 @@ namespace delaunay
 		/// <summary>
 		/// Массив всех вершин
 		/// </summary>
-		private List<Vertex> 	_points = new List<Vertex>();
+		private List<Vertex> _points = new List<Vertex>();
 
 		/// <summary>
 		/// Список всех треугольников
@@ -272,7 +279,7 @@ namespace delaunay
 		/// <param name="vx">Вершина</param>
 		private NearTris FindNearTris(Vertex vx)
 		{
-			NearTris nearTris = new NearTris { nearest = null, tris = new LinkedList< LinkedListNode<Tri> >() };
+			var nearTris = new NearTris { nearest = null, tris = new LinkedList< LinkedListNode<Tri> >() };
 
 			for(LinkedListNode<Tri> node = _tris.First; node != null; node = node.Next) 
 			{
@@ -304,12 +311,10 @@ namespace delaunay
 		/// <param name="wrongEdges">Ребра не соотв. обходу по часовой стрелке, т.е. ребра не принадлежащие контуру</param>
 		private LinkedList<Edge> ClearFromWrongEdges(IEnumerable<Edge> edges, ICollection< Edge > wrongEdges)
 		{
-			LinkedList<Edge> cleared = new LinkedList<Edge> ();
+			var cleared = new LinkedList<Edge> ();
 
 			foreach (Edge edge in edges) {
-				if (!wrongEdges.Contains(edge)) {
-					cleared.AddLast (edge);
-				}
+				if (!wrongEdges.Contains(edge)) cleared.AddLast (edge);
 			}
 
 			return cleared;
@@ -330,7 +335,7 @@ namespace delaunay
 
 			float crossProduct = CrossProduct (nextEdge, curEdge);
 
-			Edge edge = new Edge { iFrom = iCurVx, iTo = iNextVx };
+			var edge = new Edge { iFrom = iCurVx, iTo = iNextVx };
 
 			if (crossProduct < 0.0F) {
 				edges.Add(edge);
@@ -349,8 +354,8 @@ namespace delaunay
 		/// <param name="vx">Новая входная вершина</param>
 		private LinkedList<Edge> FormEdgesFromNearTris(NearTris nearTris, Vertex vx)
 		{
-			LinkedList<Edge> edges = new LinkedList<Edge>();
-			SortedSet<Edge> wrongEdges = new SortedSet<Edge>();
+			var edges = new LinkedList<Edge>();
+			var wrongEdges = new SortedSet<Edge>();
 
 			foreach (LinkedListNode<Tri> node in nearTris.tris) {
 
@@ -418,9 +423,8 @@ namespace delaunay
 			float b = r1 * v2.y + v1.y * r3 + r2 * v3.y - r3 * v2.y - r2 * v1.y - v3.y * r1;
 			float c = r1 * v2.x + v1.x * r3 + r2 * v3.x - r3 * v2.x - r2 * v1.x - v3.x * r1;
 
-			Vertex center = new Vertex { x = b / (a * 2.0F), y = -c / (a * 2.0F) };
-
-			Vertex delta = new Vertex { x = center.x - v1.x, y = center.y - v1.y };
+			var center = new Vertex { x = b / (a * 2.0F), y = -c / (a * 2.0F) };
+			var delta = new Vertex { x = center.x - v1.x, y = center.y - v1.y };
 
 			float radiusSq = delta.x * delta.x + delta.y * delta.y;
 
