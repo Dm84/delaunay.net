@@ -14,20 +14,6 @@ using Vx = delaunay.Triangulation.Vertex;
 namespace delaunay
 {
 	/// <summary>
-	/// Объект умеет рисовать
-	/// </summary>
-	public interface IDrawable 
-	{
-		/// <summary>
-		/// выполнение прорисовки треугольника и описывающей его окружности
-		/// </summary>
-		/// <param name="vertices">вершины треугольника</param>
-		/// <param name="center">центр треугольника</param>
-		/// <param name="radius">массив вершин</param>
-		void DrawTri (Vx [] vertices, Vx center, float radius);
-	}
-
-	/// <summary>
 	/// Главное окно приложения. Выполняет функции прорисовки и обработки событий ввода.
 	/// </summary>
 	public class MainWnd : Form, IDrawable
@@ -432,6 +418,21 @@ namespace delaunay
 		}
 
 	}
+
+	/// <summary>
+	/// Объект умеет рисовать
+	/// </summary>
+	public interface IDrawable 
+	{
+		/// <summary>
+		/// выполнение прорисовки треугольника и описывающей его окружности
+		/// </summary>
+		/// <param name="vertices">вершины треугольника</param>
+		/// <param name="center">центр треугольника</param>
+		/// <param name="radius">массив вершин</param>
+		void DrawTri (Vx [] vertices, Vx center, float radius);
+	}
+
 
 }
 
